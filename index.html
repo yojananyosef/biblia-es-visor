@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Borrador — Traducción bíblica (sin revisión humana)</title>
+<style>
+:root{
+  --bg:#12141a; --panel:#191c24; --panel2:#20242e; --line:#2b3040;
+  --fg:#e6e8ee; --dim:#9aa2b4; --faint:#6b7386;
+  --del:#e0556b; --delbg:#3a1f28; --add:#3fb950; --addbg:#16301d;
+  --var:#d29922; --varbg:#3a2f12; --lex:#58a6ff; --lexbg:#13293f;
+  --igual:#6b7386;
+}
+@media (prefers-color-scheme: light){
+  :root{ --bg:#fbfbfd; --panel:#fff; --panel2:#f2f4f8; --line:#dde1ea;
+         --fg:#1a1d24; --dim:#5a6274; --faint:#8b93a5;
+         --delbg:#fdecef; --addbg:#e8f6ec; --varbg:#fdf5e0; --lexbg:#e9f2fd; }
+  .aviso{color:#4a3d10}
+  .aviso b{color:#7a5c00}
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--fg);
+  font:15px/1.55 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif}
+header{padding:14px 20px;border-bottom:1px solid var(--line);background:var(--panel);
+  display:flex;align-items:baseline;gap:16px;flex-wrap:wrap}
+header h1{font-size:16px;margin:0;font-weight:650;letter-spacing:.2px}
+/* El aviso va FIJO y por encima de todo. Es lo unico que no puede quedar
+   fuera de la vista al desplazarse: sin el, el sitio se puede leer como
+   una traduccion terminada y revisada, que es exactamente lo que no es. */
+.aviso{position:sticky;top:0;z-index:20;background:var(--varbg);
+  border-bottom:1px solid var(--var);color:#f0d99e;padding:10px 20px;
+  font-size:12.5px;line-height:1.5}
+.aviso b{color:#ffd479;font-weight:650}
+/* Sin esto, publicar el visor seria redistribuir SBLGNT (CC BY 4.0) y
+   MorphGNT (CC-BY-SA 3.0) sin la atribucion que sus licencias exigen.
+   No es cortesia: es requisito. */
+footer{border-top:1px solid var(--line);background:var(--panel);
+  padding:16px 20px 22px;font-size:12px;color:var(--dim);line-height:1.6}
+footer p{margin:0 0 7px;max-width:900px}
+footer b{color:var(--fg)}
+footer code{font-size:11.5px;background:var(--panel2);padding:1px 4px;
+  border-radius:3px}
+header .sub{color:var(--dim);font-size:12.5px}
+header .spacer{flex:1}
+.stats{display:flex;gap:8px;flex-wrap:wrap}
+.stat{background:var(--panel2);border:1px solid var(--line);border-radius:6px;
+  padding:4px 9px;font-size:12px;white-space:nowrap}
+.stat b{font-variant-numeric:tabular-nums}
+.stat.IGUAL b{color:var(--igual)} .stat.ESTILO b{color:var(--dim)}
+.stat.LEXICO b{color:var(--lex)} .stat.VARIANTE b{color:var(--var)}
+main{display:flex;min-height:calc(100vh - 56px)}
+aside{width:250px;flex:0 0 250px;border-right:1px solid var(--line);
+  background:var(--panel);overflow-y:auto;max-height:calc(100vh - 56px)}
+aside h2{font-size:11px;text-transform:uppercase;letter-spacing:.8px;
+  color:var(--faint);padding:14px 16px 6px;margin:0}
+.chap{padding:7px 16px;cursor:pointer;font-size:13.5px;border-left:2px solid transparent}
+.chap:hover{background:var(--panel2)}
+.chap.on{background:var(--panel2);border-left-color:var(--lex)}
+.chap .n{display:flex;justify-content:space-between;gap:8px;align-items:center}
+.chap .c{color:var(--dim);font-variant-numeric:tabular-nums;font-size:12px}
+section{flex:1;padding:18px 22px;max-width:1000px}
+.tools{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:14px}
+button,select,input{background:var(--panel2);color:var(--fg);border:1px solid var(--line);
+  border-radius:6px;padding:5px 10px;font:inherit;font-size:13px;cursor:pointer}
+button:hover,select:hover{border-color:var(--faint)}
+button.on{background:var(--lexbg);border-color:var(--lex);color:var(--lex)}
+input[type=search]{cursor:text;min-width:180px}
+label.chk{display:flex;align-items:center;gap:6px;color:var(--dim);font-size:13px;cursor:pointer}
+.card{border:1px solid var(--line);border-radius:9px;background:var(--panel);
+  margin-bottom:12px;overflow:hidden}
+.card.VARIANTE{border-left:3px solid var(--var)}
+.card.LEXICO{border-left:3px solid var(--lex)}
+.card.ESTILO{border-left:3px solid var(--igual)}
+.card.IGUAL{border-left:3px solid var(--igual)}
+.chead{display:flex;align-items:center;gap:10px;padding:9px 14px;
+  border-bottom:1px solid var(--line);cursor:pointer;user-select:none}
+.ref{font-weight:650;font-variant-numeric:tabular-nums;font-size:13.5px}
+.badge{font-size:10.5px;letter-spacing:.5px;padding:2px 7px;border-radius:20px;
+  font-weight:600;border:1px solid}
+.badge.VARIANTE{color:var(--var);border-color:var(--var);background:var(--varbg)}
+.badge.LEXICO{color:var(--lex);border-color:var(--lex);background:var(--lexbg)}
+.badge.ESTILO{color:var(--dim);border-color:var(--line);background:var(--panel2)}
+.badge.IGUAL{color:var(--igual);border-color:var(--line);background:var(--panel2)}
+.motivo{color:var(--faint);font-size:12px;margin-left:auto;text-align:right}
+.cbody{padding:4px 14px 12px}
+.row{margin:10px 0}
+.tag{display:inline-block;font-size:10.5px;text-transform:uppercase;letter-spacing:.7px;
+  color:var(--faint);margin-bottom:3px;font-weight:600}
+.old{color:var(--dim);background:var(--delbg);border-radius:3px;padding:0 2px;
+  text-decoration:line-through;text-decoration-color:var(--del)}
+.new{color:var(--add);background:var(--addbg);border-radius:3px;padding:0 2px;font-weight:600}
+.base{font-size:16px;color:var(--lex);letter-spacing:.3px}
+.base[dir=rtl]{text-align:right;font-size:19px}
+.tok{font-size:12.5px;color:var(--dim);background:var(--panel2);border:1px solid var(--line);
+  border-radius:6px;padding:10px 12px;margin-top:8px;overflow-x:auto;white-space:pre}
+.tok i{font-style:normal;color:var(--fg)}
+.tok b{color:var(--faint);font-weight:400;font-size:11px;margin-left:6px}
+.notes{margin-top:10px;font-size:12.5px;color:var(--dim);border-top:1px dashed var(--line);
+  padding-top:9px}
+.notes p{margin:4px 0}
+.notes .k{color:var(--faint);text-transform:uppercase;font-size:10.5px;letter-spacing:.6px;
+  display:block;margin-top:7px}
+.notes .imp{color:var(--var)}
+.hide{display:none}
+.empty{color:var(--faint);padding:40px;text-align:center}
+.legend{font-size:12px;color:var(--faint);margin-bottom:14px;line-height:1.7}
+.legend s{background:var(--delbg);color:var(--del);text-decoration:line-through;padding:0 3px;border-radius:3px}
+.legend b{background:var(--addbg);color:var(--add);padding:0 3px;border-radius:3px}
+</style>
+</head>
+<body>
+<div class="aviso">
+  <b>Texto en borrador, sin revisión humana.</b> Estos versículos los
+  escribió un modelo de lenguaje y <b>ningún exegeta ni filólogo los ha
+  revisado</b>. Hay decisiones todavía abiertas y capítulos con señales
+  morfológicas sin resolver. Sirven para seguir el avance del proyecto:
+  no los uses para predicación, estudio ni ministerio.
+</div>
+<header>
+  <h1>Traducción bíblica <span style="color:var(--faint);font-weight:400">/ comparativa</span></h1>
+  <span class="sub">contra Reina-Valera 1909</span>
+  <span class="spacer"></span>
+  <div class="stats" id="stats"></div>
+</header>
+<main>
+  <aside>
+    <h2>Capítulos</h2>
+    <div id="chaplist"></div>
+  </aside>
+  <section>
+    <div class="tools">
+      <input type="search" id="q" placeholder="Buscar versículo o texto…">
+      <button id="fVARIANTE" class="f">Solo variante</button>
+      <button id="fLEXICO" class="f">Solo léxico</button>
+      <button id="soloCambios">Solo los que cambian</button>
+      <button id="verBase">Original y morfología</button>
+      <button id="verNotas">Notas</button>
+      <button id="expandir" class="on">Todo abierto</button>
+      <button id="copiar">Copiar HTML</button>
+    </div>
+    <div class="legend">
+      <s>palabra de la 1909</s> se reemplaza por <b>palabra de la traducción nueva</b>.
+      El color del borde indica la categoría: <span class="badge VARIANTE">VARIANTE</span>
+      el cambio viene de una lectura textual documentada ·
+      <span class="badge LEXICO">LÉXICO</span> cambia una palabra con carga de sentido ·
+      <span class="badge ESTILO">ESTILO</span> solo cambia la forma.
+    </div>
+    <div id="out"></div>
+  </section>
+</main>
+<footer>
+  <p><b>Fuentes.</b> Texto base del Antiguo: Westminster Leningrad Codex
+  (dominio público), con morfología de Open Scriptures Hebrew Bible
+  (CC BY 4.0). Texto base del Nuevo: SBL Greek New Testament
+  (CC BY 4.0), con morfología de MorphGNT (CC-BY-SA 3.0). Anclaje de
+  comparación: Reina-Valera 1909 (dominio público).</p>
+  <p><b>Sobre estos textos.</b> La traducción es un borrador escrito con
+  asistencia de modelo de lenguaje y <b>sin revisión humana</b>. No es una
+  versión de la Biblia. Los cambios contra la 1909 son de traducción, no
+  de Hermenéutica ni de dogma.</p>
+  <p><b>Generado</b> por <code>herramientas/sitio.py</code>. Los datos van
+  embebidos en <code>datos.js</code> para que la página funcione con doble
+  clic, sin servidor.</p>
+</footer>
+<script src="datos.js"></script>
+<script>
+const D = window.BIBLIA;
+let capActual = Object.keys(D.capitulos)[0] || null;
+let filtros = new Set();
+const $ = s => document.querySelector(s);
+const esc = s => String(s).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+
+function stats(){
+  const r = D.resumen, el = $('#stats');
+  el.innerHTML = [
+    ['capítulo'+(r.capitulos==1?'':'s'), r.capitulos],
+    ['versículo'+(r.versiculos==1?'':'s'), r.versiculos],
+    ['IGUAL', r.iguales], ['ESTILO', r.estilo],
+    ['LÉXICO', r.lexico], ['VARIANTE', r.variante]
+  ].map(([k,v]) => `<span class="stat ${esc(k)}"><b>${v}</b> ${esc(k.toLowerCase())}</span>`).join('');
+}
+
+function capitulos(){
+  $('#chaplist').innerHTML = Object.entries(D.capitulos).map(([k,c]) => {
+    const cnt = c.versos.reduce((a,v)=>(a[v.cat]=(a[v.cat]||0)+1,a),{});
+    const meta = [cnt.VARIANTE?'V '+cnt.VARIANTE:null, cnt.LEXICO?'L '+cnt.LEXICO:null]
+      .filter(Boolean).join(' · ');
+    return `<div class="chap${k===capActual?' on':''}" data-k="${esc(k)}">
+      <div class="n"><span>${esc(c.titulo)}</span><span class="c">${c.versos.length}</span></div>
+      ${meta?`<div class="c" style="text-align:left;margin-top:2px">${esc(meta)}</div>`:''}</div>`;
+  }).join('');
+  document.querySelectorAll('.chap').forEach(e =>
+    e.onclick = () => { capActual = e.dataset.k; capitulos(); render(); });
+}
+
+function alineado(v){
+  return v.ops.map(o => {
+    const a = (o.a||[]).join(' '), b = (o.n||[]).join(' ');
+    // Python emite "igual"; difflib usa "equal". Se aceptan ambos.
+    if (o.t === 'equal' || o.t === 'igual') return `<span>${esc(b||a)}</span>`;
+    return (a?`<span class="old">${esc(a)}</span> ` : '') +
+           (b?`<span class="new">${esc(b)}</span>` : '');
+  }).join(' ');
+}
+
+function tarjeta(v){
+  const base = v.baseTipo === 'hebreo'
+    ? `<div class="base" dir="rtl">${esc(v.base)}</div>`
+    : `<div class="base">${esc(v.base)}</div>`;
+  const toks = v.tokens.length
+    ? `<div class="tok hide" data-tok>${v.tokens.map(t =>
+        `<i>${esc(t.forma)}</i><b>${esc(t.lema)} ${esc(t.parseo)}</b>`).join('  ')}</div>` : '';
+  const notas = (v.variante && v.variante !== 'sin variante') || v.glosa
+    ? `<div class="notes hide" data-notas>
+        ${v.variante && v.variante !== 'sin variante'
+          ? `<span class="k">Variante textual</span><p>${esc(v.variante)}</p>` : ''}
+        ${v.glosa ? `<span class="k">Glosa / duda</span><p>${esc(v.glosa)}</p>` : ''}
+       </div>` : '';
+  return `<article class="card ${esc(v.cat)}" data-cat="${esc(v.cat)}">
+    <div class="chead">
+      <span class="ref">${esc(v.ref)}</span>
+      <span class="badge ${esc(v.cat)}">${esc(v.cat === 'LEXICO' ? 'LÉXICO' : v.cat)}</span>
+      <span class="motivo">${esc((v.motivo||[]).join(' · '))}</span>
+    </div>
+    <div class="cbody">
+      <div class="row"><span class="tag">Original ${esc(v.baseTipo)}</span>${base}${toks}</div>
+      <div class="row"><span class="tag">RV1909 → traducción nueva</span>
+        <div style="font-size:15.5px;line-height:1.75">${alineado(v)}</div></div>
+      <div class="row"><span class="tag">Texto resultante</span>
+        <div style="font-size:15.5px">${esc(v.tr)}</div></div>
+      ${notas}
+    </div></article>`;
+}
+
+function render(){
+  if (!capActual){ $('#out').innerHTML = '<div class="empty">Sin capítulos traducidos todavía.</div>'; return; }
+  const cap = D.capitulos[capActual];
+  const q = $('#q').value.trim().toLowerCase();
+  const soloCambios = $('#soloCambios').classList.contains('on');
+  let vs = cap.versos.filter(v => !filtros.size || filtros.has(v.cat));
+  if (soloCambios) vs = vs.filter(v => v.cat !== 'IGUAL');
+  if (q) vs = vs.filter(v => (v.ref+' '+v.rv+' '+v.tr+' '+v.base).toLowerCase().includes(q));
+  $('#out').innerHTML = vs.length
+    ? vs.map(tarjeta).join('')
+    : '<div class="empty">Ningún versículo coincide con el filtro.</div>';
+  if ($('#verBase').classList.contains('on')) mostrar('[data-tok]', true);
+  if ($('#verNotas').classList.contains('on')) mostrar('[data-notas]', true);
+  if (!$('#expandir').classList.contains('on')) mostrar('.cbody', false);
+  document.querySelectorAll('.chead').forEach(h => h.onclick = () => {
+    const b = h.nextElementSibling;
+    b.classList.toggle('hide');
+    $('#expandir').classList.toggle('on', b.classList.contains('hide') ? false : true);
+  });
+}
+function mostrar(sel, on){ document.querySelectorAll(sel).forEach(e => e.classList.toggle('hide', !on)); }
+
+stats(); capitulos(); render();
+
+$('#q').oninput = render;
+['fVARIANTE','fLEXICO'].forEach(id => {
+  const cat = id === 'fVARIANTE' ? 'VARIANTE' : 'LEXICO';
+  $('#'+id).onclick = e => {
+    filtros.has(cat) ? filtros.delete(cat) : filtros.add(cat);
+    e.target.classList.toggle('on');
+    render();
+  };
+});
+$('#soloCambios').onclick = e => { e.target.classList.toggle('on'); render(); };
+$('#verBase').onclick   = e => { e.target.classList.toggle('on'); mostrar('[data-tok]', e.target.classList.contains('on')); };
+$('#verNotas').onclick  = e => { e.target.classList.toggle('on'); mostrar('[data-notas]', e.target.classList.contains('on')); };
+$('#expandir').onclick  = e => { e.target.classList.toggle('on'); mostrar('.cbody', e.target.classList.contains('on')); };
+$('#copiar').onclick = () => {
+  const t = document.querySelector('section').innerText;
+  navigator.clipboard.writeText(t).then(()=>{
+    $('#copiar').textContent = 'Copiado';
+    setTimeout(()=>$('#copiar').textContent='Copiar HTML', 1400);
+  });
+};
+document.addEventListener('keydown', e => {
+  if (e.key === '/' && document.activeElement !== $('#q')) { e.preventDefault(); $('#q').focus(); }
+});
+</script>
+</body>
+</html>
