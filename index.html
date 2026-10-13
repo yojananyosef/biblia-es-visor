@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Borrador — Traducción bíblica (sin revisión humana)</title>
+<title>Borrador — Traducción bíblica</title>
 <style>
 :root{
   --bg:#12141a; --panel:#191c24; --panel2:#20242e; --line:#2b3040;
@@ -11,13 +11,13 @@
   --del:#e0556b; --delbg:#3a1f28; --add:#3fb950; --addbg:#16301d;
   --var:#d29922; --varbg:#3a2f12; --lex:#58a6ff; --lexbg:#13293f;
   --igual:#6b7386;
+  --avisfg:#f0d99e; --avisob:#ffd479;
 }
 @media (prefers-color-scheme: light){
   :root{ --bg:#fbfbfd; --panel:#fff; --panel2:#f2f4f8; --line:#dde1ea;
          --fg:#1a1d24; --dim:#5a6274; --faint:#8b93a5;
          --delbg:#fdecef; --addbg:#e8f6ec; --varbg:#fdf5e0; --lexbg:#e9f2fd; }
-  .aviso{color:#4a3d10}
-  .aviso b{color:#7a5c00}
+  :root{ --avisfg:#4a3d10; --avisob:#7a5c00; }
 }
 *{box-sizing:border-box}
 body{margin:0;background:var(--bg);color:var(--fg);
@@ -27,11 +27,27 @@ header{padding:14px 20px;border-bottom:1px solid var(--line);background:var(--pa
 header h1{font-size:16px;margin:0;font-weight:650;letter-spacing:.2px}
 /* El aviso va FIJO y por encima de todo. Es lo unico que no puede quedar
    fuera de la vista al desplazarse: sin el, el sitio se puede leer como
-   una traduccion terminada y revisada, que es exactamente lo que no es. */
+   una traduccion terminada y revisada, que es exactamente lo que no es.
+
+   Ocupa UNA LINEA y se despliega al hacer click. No es que el aviso se
+   pueda quitar: es que en reposo solo se ve la advertencia en corto, y el
+   texto entero aparece cuando se pide. Arranca asi en cada carga, sin
+   memoria entre visitas: si el lector lo cerrara y lo=shareara, lo que
+   sale ya no lleva la advertencia. */
 .aviso{position:sticky;top:0;z-index:20;background:var(--varbg);
-  border-bottom:1px solid var(--var);color:#f0d99e;padding:10px 20px;
+  border-bottom:1px solid var(--var);color:var(--avisfg);
   font-size:12.5px;line-height:1.5}
-.aviso b{color:#ffd479;font-weight:650}
+.aviso .barra{display:flex;align-items:center;gap:9px;padding:5px 20px;
+  cursor:pointer;user-select:none}
+.aviso .barra:hover{background:rgba(255,255,255,.04)}
+.aviso .barra:focus-visible{outline:2px solid var(--avisob);outline-offset:-2px}
+.aviso b{color:var(--avisob);font-weight:650}
+.aviso .mas{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.aviso .flecha{flex:0 0 auto;color:var(--avisob);font-size:10px;
+  transition:transform .15s ease}
+.aviso.abierto .flecha{transform:rotate(90deg)}
+.aviso .detalle{display:none;padding:0 20px 12px;max-width:900px}
+.aviso.abierto .detalle{display:block}
 /* Sin esto, publicar el visor seria redistribuir SBLGNT (CC BY 4.0) y
    MorphGNT (CC-BY-SA 3.0) sin la atribucion que sus licencias exigen.
    No es cortesia: es requisito. */
@@ -110,12 +126,19 @@ label.chk{display:flex;align-items:center;gap:6px;color:var(--dim);font-size:13p
 </style>
 </head>
 <body>
-<div class="aviso">
-  <b>Texto en borrador, sin revisión humana.</b> Estos versículos los
-  escribió un modelo de lenguaje y <b>ningún exegeta ni filólogo los ha
-  revisado</b>. Hay decisiones todavía abiertas y capítulos con señales
-  morfológicas sin resolver. Sirven para seguir el avance del proyecto:
-  no los uses para predicación, estudio ni ministerio.
+<div class="aviso" id="aviso">
+  <div class="barra" id="avisoBarra" role="button" tabindex="0"
+       aria-expanded="false" aria-controls="avisoDetalle">
+    <b>Texto en borrador.</b>
+    <span class="mas">Avance del proyecto — ver el aviso</span>
+    <span class="flecha">&#9656;</span>
+  </div>
+  <div class="detalle" id="avisoDetalle">
+    Estos versículos los escribió un modelo de lenguaje. Hay decisiones
+    todavía abiertas y capítulos con señales morfológicas sin resolver.
+    Sirven para seguir el avance del proyecto: no los uses para predicación,
+    estudio ni ministerio.
+  </div>
 </div>
 <header>
   <h1>Traducción bíblica <span style="color:var(--faint);font-weight:400">/ comparativa</span></h1>
@@ -156,10 +179,10 @@ label.chk{display:flex;align-items:center;gap:6px;color:var(--dim);font-size:13p
   (CC BY 4.0), con morfología de MorphGNT (CC-BY-SA 3.0). Anclaje de
   comparación: Reina-Valera 1909 (dominio público).</p>
   <p><b>Sobre estos textos.</b> La traducción es un borrador escrito con
-  asistencia de modelo de lenguaje y <b>sin revisión humana</b>. No es una
+  asistencia de modelo de lenguaje. No es una
   versión de la Biblia. Los cambios contra la 1909 son de traducción, no
   de Hermenéutica ni de dogma.</p>
-  <p><b>Generado</b> por <code>herramientas/sitio.py</code> desde el commit <code>0dbf862 · 2026-10-13</code>. Los datos van embebidos en <code>datos.js</code> para que la página funcione con doble clic, sin servidor.</p>
+  <p><b>Generado</b> por <code>herramientas/sitio.py</code> desde el commit <code>6471dcf · 2026-10-13</code>. Los datos van embebidos en <code>datos.js</code> para que la página funcione con doble clic, sin servidor.</p>
 </footer>
 <script src="datos.js"></script>
 <script>
@@ -278,6 +301,12 @@ $('#copiar').onclick = () => {
 document.addEventListener('keydown', e => {
   if (e.key === '/' && document.activeElement !== $('#q')) { e.preventDefault(); $('#q').focus(); }
 });
+const aviso = $('#aviso'), avisoBarra = $('#avisoBarra');
+const toggleAviso = () => aviso.classList.toggle('abierto');
+avisoBarra.onclick = toggleAviso;
+avisoBarra.onkeydown = e => {
+  if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); toggleAviso(); }
+};
 </script>
 </body>
 </html>
